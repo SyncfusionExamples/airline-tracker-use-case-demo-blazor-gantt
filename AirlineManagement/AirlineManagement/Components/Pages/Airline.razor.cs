@@ -126,7 +126,7 @@ namespace AirlineManagement.Components.Pages
             new AssignmentModel(){ PrimaryId=19, TaskId = 28, ResourceId=4}
         };
 
-        private void Resource()
+        private void ChangeViewType()
         {
             if (viewType == ViewType.ResourceView)
             {
@@ -189,8 +189,8 @@ namespace AirlineManagement.Components.Pages
                     statusContentstyleColor = "#006AA6";
                     break;
                 case "Cancel":
-                    statusStyleColor = "red";
-                    statusContentstyleColor = "white";
+                    statusStyleColor = "#FF0000";
+                    statusContentstyleColor = "#FFFFFF";
                     break;
                 case "Completed":
                     statusStyleColor = "#DFFFE2";

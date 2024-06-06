@@ -16,7 +16,7 @@
 <div class="w-100">
 <div class="e-switch-control">
                 <label class="showhide"> Project View </label>
-                <SfSwitch ValueChange="Resource" @bind-Checked="@check" TChecked="bool"></SfSwitch>
+                <SfSwitch ValueChange="ChangeViewType" @bind-Checked="@check" TChecked="bool"></SfSwitch>
                 <label class="showhide"> Resource View </label>
             </div>
 <SfGantt @ref="_ganttInstance" ViewType="@viewType" ConnectorLineBackground="#006400" DataSource="@airlineInformations" DurationUnit="DurationUnit.Hour" IncludeWeekend="true" TreeColumnIndex="2" ScrollToTaskbarOnClick="true" Height="450px" Width="100%" RowHeight="40">
