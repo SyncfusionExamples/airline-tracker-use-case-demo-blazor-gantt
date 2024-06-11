@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="D:\Source\Scrollbar\Source\ej2-blazor-source\Syncfusion.Blazor\Syncfusion.Blazor.csproj" />
+    <PackageReference Include="Syncfusion.Blazor" Version="26.1.35" />
   </ItemGroup>
 
 </Project>
