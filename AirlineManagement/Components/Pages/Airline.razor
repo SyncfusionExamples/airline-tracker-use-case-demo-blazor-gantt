@@ -1,0 +1,414 @@
+﻿@page "/airline"
+
+@rendermode InteractiveServer
+
+@using Syncfusion.Blazor.Gantt
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.QueryBuilder
+@using Syncfusion.Blazor.Calendars
+
+<section class="sf-filter-bar p-0 container-fluid w-100">
+    <div class="container p-0">
+        <div class="row py-3">
+            <div class="col-lg-2 col-xl-2 p-1">
+                <label>Airlines</label>
+                <SfDropDownList Placeholder="Select airline" ShowClearButton Value="@_flightAirline" ValueChanged="FlightAirlineHandler" TValue="string" DataSource="@airlines" TItem="string"></SfDropDownList>
+            </div>
+            <div class="col-lg-2 col-xl-2 p-1">
+                <label>Flight Code</label>
+                <SfTextBox Placeholder="Flight Code" ShowClearButton Value="@_flightNumber" ValueChanged="FlightNumberHandler"></SfTextBox>
+            </div>
+            <div class="col-lg-2 col-xl-2 p-1">
+                <label>Date</label>
+                <SfDatePicker TValue="DateTime" Value="@_flightDepartureDate" ShowClearButton ShowTodayButton Placeholder="Select flight date" ValueChanged="FlightDateHandler"></SfDatePicker>
+            </div>
+            <div class="col-lg-2 col-xl-2 p-1">
+                <label>Origin</label>
+                 <SfDropDownList Placeholder="Select Origin" ShowClearButton Value="@_flightOrigin" ValueChanged="FlightOriginHandler" TValue="string" DataSource="@startPlaces" TItem="string"></SfDropDownList>
+            </div>
+            <div class="col-lg-2 col-xl-2 p-1">
+                <label>Destination</label>
+                 <SfDropDownList Placeholder="Select Destination" ShowClearButton Value="@_flightDestination" ValueChanged="FlightDestinationHandler" TValue="string" DataSource="@destinationPlaces" TItem="string"></SfDropDownList>
+            </div>
+            <div class="col-lg-2 col-xl-2 p-1">
+                <div class="row px-1 pt-3" style="padding-top: 8px;">
+                    <div class="p-1 w-100 d-inline-block">
+                        <SfButton Content="Search" CssClass="sf-gantt-filter-btn" OnClick="FilterHandler" class="btn btn-outline-light"></SfButton>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="container-fluild p-0 py-2">
+    <div class="container p-0">
+        <SfGantt @ref="ganttInstance" Query="@_query" ConnectorLineBackground="#006400" DataSource="@airlineInformations" DurationUnit="DurationUnit.Hour" IncludeWeekend="true" TreeColumnIndex="1" ScrollToTaskbarOnClick="true" Height="550px" Width="100%" RowHeight="65">
+            <GanttTaskFields Id="Id" Name="FlightId" ParentID="ParentId" StartDate="Departure" EndDate="Arrival" Duration="Duration" Progress="Progress">
+            </GanttTaskFields>
+            <GanttSearchSettings HierarchyMode="FilterHierarchyMode.Both"></GanttSearchSettings>
+            <GanttDayWorkingTimeCollection>
+                <GanttDayWorkingTime From="0" To="24"></GanttDayWorkingTime>
+            </GanttDayWorkingTimeCollection>
+            <GanttSplitterSettings Position="40%"></GanttSplitterSettings>
+            <GanttLabelSettings RightLabel="Destination" LeftLabel="Origin" TValue="AirlineInfoModel"></GanttLabelSettings>
+            <GanttColumns>
+                <GanttColumn Field="Id" Visible="false"></GanttColumn>
+                <GanttColumn Field="FlightId" IsFrozen HeaderText="Flight Info">
+                    <HeaderTemplate>
+                         @{
+                            var data = context as AirlineInfoModel;
+                            <div>
+                                <i class="fa fa-plane" style="font-size:18px"></i><span class="mx-2">Flight Info</span>
+                            </div>
+                        }
+                    </HeaderTemplate>
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            <div>
+                                @if (datas is not null && !string.IsNullOrEmpty(datas.FlightId))
+                                {
+                                    <span style="font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">@datas.FlightId</span>
+                                }
+                                else
+                                {
+                                    <span style="font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">@datas.Airline</span>
+                                }
+                            </div>
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn Field="Status">
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            string statusStyle = GetStatusContentStyles(datas.Status);
+                            <div><span class="e-airline-status" style="@statusStyle">@datas.Status</span></div>
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn AllowEditing=false Field="LandingTime" HeaderText="Landing Time">
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            if (datas is not null && datas.Arrival is not null && datas.LandingTime != null)
+                            {
+                                var diff = datas.Arrival.Value.CompareTo(datas.LandingTime.Value);
+                                if (diff == -1)
+                                {
+                                    var diffTime = (datas.Arrival.Value - datas.LandingTime.Value).Minutes + ".00";
+                                    <div>
+                                        <span style="color:red;font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">@(diffTime) Min</span>
+                                    </div>
+                                }
+                                else if (diff == 1)
+                                {
+                                    var diffTime = (datas.Arrival.Value - datas.LandingTime.Value).Minutes + ".00";
+                                    <div>
+                                        <span style="color:green;font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">+@(diffTime) Min</span>
+                                    </div>
+                                }
+                            }
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn Field="ArrivalGate" HeaderText="Gate">
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            if (datas != null)
+                            {
+                                if(datas.Status == "SCHEDULED")
+                                {
+                                    <div><span>@datas.DepartureGate</span></div>
+                                }
+                                else if(datas.Status == "ON TIME" || datas.Status == "DELAYED")
+                                {
+                                    <div><span>@datas.ArrivalGate</span></div>
+                                }
+                            }                                
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn Field="Origin" ClipMode="ClipMode.EllipsisWithTooltip">
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            if (datas != null)
+                            {
+                                <div style="font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">@(datas.Origin)</div>
+                            }
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn Field="Destination" ClipMode="ClipMode.EllipsisWithTooltip">
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            if (datas != null)
+                            {
+                                <div style="font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">@(datas.Destination)</div>
+                            }
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn Field="DepartureTime" Width="180px" EditType="EditType.DateTimePickerEdit" HeaderText="Departure Time" ClipMode="ClipMode.EllipsisWithTooltip">
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            if (datas is null)
+                            {
+                                return;
+                            }
+                            <span style="font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">@datas.Departure?.ToString("MM/dd/yyyy HH:mm")</span>
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn Field="ArrivalTime" Width="180px" EditType="EditType.DateTimePickerEdit" HeaderText="Arrival Time" ClipMode="ClipMode.EllipsisWithTooltip">
+                    <Template>
+                        @{
+                            var datas = context as AirlineInfoModel;
+                            if (datas is null)
+                            {
+                                return;
+                            }
+                            <span style="font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;">@datas.Arrival?.ToString("MM/dd/yyyy HH:mm")</span>
+                        }
+                    </Template>
+                </GanttColumn>
+                <GanttColumn Field="Aircraft"></GanttColumn>
+            </GanttColumns>
+            <GanttTimelineSettings TimelineUnitSize="145">
+                <GanttTopTierSettings Unit="TimelineViewMode.Day" Format="MMM dd,yyyy"></GanttTopTierSettings>
+                <GanttBottomTierSettings Count="2" Unit="TimelineViewMode.Hour" Format="HH:mm"></GanttBottomTierSettings>
+            </GanttTimelineSettings>
+            <GanttTooltipSettings TValue="AirlineInfoModel">
+                <TaskbarTemplate>
+                    @{
+                        var datas = context as AirlineInfoModel;
+                        <div>
+                            <table class="table table-borderless table-hover mb-0" style="color:#FFFFFF">
+                                <tr>
+                                    <td class="text-center" style="padding: 6px 0px"><span style="font-size:20px;font-weight:bold">@datas.Origin</span></td>
+                                    <td class="text-center" style="padding: 6px 0px"><span style="font-size:20px;font-weight:bold">@datas.Destination</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="border-right:1px solid #fff">
+                                        <div>
+                                            @if (!string.IsNullOrEmpty(datas.Origin))
+                                            {
+                                                <span>@datas.Origin</span>
+                                                <span> - @datas.Departure.Value.ToString("HH: mm")</span>
+                                            }
+                                            <div class="row">
+                                                <div class="w-50 d-inline-block">
+                                                    <span class="d-block">Departed</span>
+                                                    <span>@datas.Departure.Value.ToString("HH: mm")</span>
+                                                </div>
+                                                <div class="w-50 d-inline-block">
+                                                    <span class="d-block">Gate</span>
+                                                    <span>@datas.DepartureGate</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            @if (!string.IsNullOrEmpty(datas.Destination))
+                                            {
+                                                <span>@datas.Destination</span>
+                                                <span> - @datas.Arrival.Value.ToString("HH: mm")</span>
+                                            }
+                                            <div class="row">
+                                                <div class="w-50 d-inline-block">
+                                                    <span class="d-block">Arrival</span>
+                                                    <span>@datas.Arrival.Value.ToString("HH: mm")</span>
+                                                </div>
+                                                <div class="w-50 d-inline-block">
+                                                    <span class="d-block">Gate</span>
+                                                    <span>@datas.ArrivalGate</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    }
+                </TaskbarTemplate>
+            </GanttTooltipSettings>
+            <GanttTemplates TValue="AirlineInfoModel">
+                <TaskbarTemplate>
+                    @{
+                        var task = (context as AirlineInfoModel);
+                        if (task == null)
+                        {
+                            return;
+                        }
+                        <div>
+                            <SfSlider ReadOnly EnableAnimation Value="@task.Progress" CssClass="" Type="SliderType.MinRange">
+                             </SfSlider>
+                         </div>
+                        <div class="w-100">
+                            <div class="float-start w-50 d-inline-block" style="font-weight:bold; color:green;font-size: 11px;
+            padding: 13px 0px;">
+                                @(task.Departure.Value.ToString("HH: mm"))
+                            </div>
+                            <div class="float-end text-end w-50 d-inline-block" style="font-weight:bold; color:green;font-size: 11px;
+            padding: 13px 0px;">
+                                @(task.Arrival.Value.ToString("HH: mm"))
+                            </div>
+                        </div>
+                    }
+                </TaskbarTemplate>
+                <ParentTaskbarTemplate>
+                    @{
+                        var task = (context as AirlineInfoModel);
+                        if (task == null)
+                        {
+                            return;
+                        }
+                        <div>
+                            <SfSlider ReadOnly EnableAnimation Value="@task.Progress" CssClass="e-gantt-slider-parent-taskbar" Type="SliderType.MinRange">
+                             </SfSlider>
+                         </div>
+                        <div class="w-100">
+                            <div class="float-start w-50 d-inline-block" style="font-weight:bold; color:#3745B6;font-size: 11px;
+                padding: 13px 0px;">
+                                @(task.Departure.Value.ToString("HH: mm"))
+                            </div>
+                            <div class="float-end text-end w-50 d-inline-block" style="font-weight:bold; color:#3745B6;font-size: 11px;
+                padding: 13px 0px;">
+                                @(task.Arrival.Value.ToString("HH: mm"))
+                            </div>
+                        </div>
+                    }
+                </ParentTaskbarTemplate>
+            </GanttTemplates>
+        </SfGantt>
+    </div>
+</section>
+<style>
+
+    .e-right-label-inner-div .e-label, .e-left-label-inner-div .e-label {
+        font-weight: bold;
+        font-size: 30px !important;
+    }
+
+    .e-right-label-inner-div .e-label{
+        margin-left: 17px !important;
+    }
+
+    .e-taskbar-main-container {
+        margin-top: 0px !important;
+    }
+
+    .e-handle {
+        background-image: url(bootstrap/img/flight_image_child.png) !important;
+        width: 40px !important;
+        height: 95px !important;
+        background-size: contain;
+        background-repeat: no-repeat;
+        margin-top: -20px !important;
+        margin-left: -23px !important;
+        background-color: transparent !important;
+        border: none !important;
+        transform: rotate(45deg) !important;
+    }
+
+    .e-slider-track {
+        background: #A3CCAF !important;
+        height: 11px !important;
+    }
+
+    .e-slider-container .e-range {
+        background: #008000 !important;
+        height: 11px !important;
+    }
+
+    .e-gantt-slider-parent-taskbar .e-slider-track {
+        background: #CCD2FF !important;
+    }
+
+    .e-gantt-slider-parent-taskbar .e-range {
+        background: #3745B6 !important;
+    }
+
+    .e-gantt-slider-parent-taskbar .e-handle {
+        background-image: url(bootstrap/img/flight_image_parent.png) !important;
+    }
+
+    .e-control-wrapper.e-slider-container.e-horizontal {
+        height: 0px;
+    }
+
+    .e-slider-container {
+        padding-top: 30px;
+    }
+
+    .sf-filter-bar {
+        background: #641F9B;
+        color: #ffffff;
+    }
+
+    .sf-gantt-filter-btn {
+        width: 100%;
+        background: #E4C2FF !important;
+        color: #000 !important;
+        font-weight: bold !important;
+        margin-bottom: 5px;
+        margin-top: 3px !important;
+    }
+
+        .sf-gantt-filter-btn:hover {
+            background: #E4C2FF !important;
+            color: #000 !important;
+        }
+
+    .e-control.e-gantt {
+        box-shadow: 0px 0px 11px 3px lightgray;
+    }
+
+    .e-timeline-top-header-cell, .e-gantt .e-gantt-tree-grid-pane .e-headercell {
+        background: #E4C2FF !important;
+        border: 1px solid #ffff !important;
+    }
+
+    .e-gridcontent tr:nth-child(even) td  {
+        background-color: #f2f2f2 !important;
+    }
+
+    .e-chart-root-container tr:nth-child(even) {
+        background-color: #f2f2f2 !important;
+    }
+
+    .e-grid .e-headercell {
+        padding-left: 18px !important;
+    }
+
+    .e-grid .e-treecell {
+        font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;
+    }
+
+    .sf-gantt-clear-btn {
+        width: 100%;
+        background: cornflowerblue;
+        font-weight: bold;
+    }
+
+        .sf-gantt-clear-btn:hover {
+            background: cornflowerblue;
+        }
+
+    .e-search-icon::before {
+        content: '\e754';
+        font-family: e-icons;
+    }
+</style>
+

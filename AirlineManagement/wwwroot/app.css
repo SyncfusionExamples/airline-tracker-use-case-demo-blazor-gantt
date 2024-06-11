@@ -1,0 +1,8 @@
+@font-face {
+    font-family: DMSans-regular;
+    src: url(bootstrap/DM_Sans/DMSans-Regular.ttf);
+}
+html, body {
+    background: #F0FFFF;
+    font-family: DMSans-regular, DMSans-regular, DMSans-regular, sans-serif !important;
+}
