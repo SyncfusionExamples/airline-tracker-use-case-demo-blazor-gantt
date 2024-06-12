@@ -9,14 +9,14 @@ using System;
 
 namespace AirlineManagement.Components.Pages
 {
-    public partial class Airline
+    public partial class Home
     {
         private SfGantt<AirlineInfoModel> ganttInstance { get; set; } = new();
-        private SfTextBox TextBoxSearchObj { get; set; } =new();
+        private SfTextBox TextBoxSearchObj { get; set; } = new();
         private List<AirlineInfoModel> airlineInformations { get; set; } = new();
         private string[] airlines { get; set; } = new[] { "Thai Airways", "AirArabia Airlines", "Emirates Airlines", "Qatar Airways", "South Airlines" };
         private string[] startPlaces { get; set; } = new[] { "BUR", "OMA", "DEN", "LAX", "SHJ", "TFU", "HND", "DXB", "JFK", "MXP", "BKK", "SHJ" };
-        private string[] destinationPlaces { get; set; } = new[] { "RNO", "BUR", "OAK", "LAX", "SZX", "FUK", "DXB", "JFK", "EWR","CNX", "BKK", "HKT", "HDY", "SHJ", "BAH", "RUH" };
+        private string[] destinationPlaces { get; set; } = new[] { "RNO", "BUR", "OAK", "LAX", "SZX", "FUK", "DXB", "JFK", "EWR", "CNX", "BKK", "HKT", "HDY", "SHJ", "BAH", "RUH" };
         private string _statusStyleColor = string.Empty;
         private string _statusContentstyleColor = string.Empty;
         private string _flightNumber = string.Empty;
@@ -24,7 +24,7 @@ namespace AirlineManagement.Components.Pages
         private DateTime _flightDepartureDate = DateTime.Now;
         private string _flightOrigin = string.Empty;
         private string _flightDestination = string.Empty;
-        private Query _query=new();
+        private Query _query = new();
         protected override async Task OnInitializedAsync()
         {
             airlineInformations = GetTaskCollection();
@@ -104,12 +104,12 @@ namespace AirlineManagement.Components.Pages
             new AirlineInfoModel { Id = 30, ParentId = 25, FlightId = "THA263", Airline = "Thai Airways", Departure = new DateTime(2024, 06, 10, 12, 37, 00), Arrival = new DateTime(2024, 06, 10, 14, 02, 00), Destination = "HDY", Origin = "BKK", Aircraft = "Airbus A320", DepartureGate= "2", ArrivalGate = "4", Progress=100, Status = "ON TIME"},
         };
 
-        
+
         private IGanttTaskModel<AirlineInfoModel> GetTaskData(AirlineInfoModel data)
         {
             return ganttInstance.GetRowTaskModel(data);
         }
-      
+
         private string GetStatusContentStyles(string status)
         {
             if (string.IsNullOrEmpty(status))
@@ -140,7 +140,7 @@ namespace AirlineManagement.Components.Pages
         }
         private async Task ValueChangeHandler(ChangedEventArgs args)
         {
-            if(args.PreviousValue is null)
+            if (args.PreviousValue is null)
             {
                 return;
             }
@@ -152,7 +152,7 @@ namespace AirlineManagement.Components.Pages
         }
         private void FlightDateHandler(DateTime value)
         {
-            if(value.Ticks == 0)
+            if (value.Ticks == 0)
             {
                 _flightDepartureDate = DateTime.Now;
                 return;
@@ -187,7 +187,7 @@ namespace AirlineManagement.Components.Pages
                 });
             }
 
-            if(_flightDepartureDate.Ticks != 0 && _flightDepartureDate.Date.Ticks != DateTime.Now.Date.Ticks)
+            if (_flightDepartureDate.Ticks != 0 && _flightDepartureDate.Date.Ticks != DateTime.Now.Date.Ticks)
             {
                 predicateList.Add(new WhereFilter()
                 {
@@ -238,7 +238,7 @@ namespace AirlineManagement.Components.Pages
         }
         private async Task ClearFilterHandler(MouseEventArgs args)
         {
-            _flightNumber = string.Empty; 
+            _flightNumber = string.Empty;
             _flightOrigin = string.Empty;
             _flightDestination = string.Empty;
             _flightAirline = string.Empty;
